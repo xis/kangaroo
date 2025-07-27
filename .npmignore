@@ -1,0 +1,49 @@
+# Source files
+src/
+tests/
+scripts/
+
+# Configuration files
+tsconfig*.json
+rollup.config.js
+jest.config.js
+.eslintrc.js
+
+# Development files
+.gitignore
+.npmignore
+
+# Documentation source
+docs/
+
+# Coverage reports
+coverage/
+
+# Build artifacts (keep only dist)
+*.tsbuildinfo
+
+# Development dependencies
+node_modules/
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+
+# Logs
+*.log
+
+# Test files
+**/*.test.ts
+**/*.spec.ts
+__tests__/
+
+# Examples and benchmarks
+examples/
+benchmarks/
+
+# Local development
+.local/
+scripts/local/
