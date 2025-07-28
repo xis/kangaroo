@@ -18,7 +18,7 @@ A secure JavaScript-like expression evaluator that uses AST-based execution inst
 ## Installation
 
 ```bash
-npm install kangaroo
+npm install kangaroo-expression
 ```
 
 ## Quick Start
