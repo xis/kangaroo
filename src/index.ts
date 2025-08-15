@@ -77,7 +77,7 @@ export { ASTArrayOperations, ASTCallbackEvaluator } from './callbacks/operations
 export { DefaultTypeRegistry, getGlobalTypeRegistry, setGlobalTypeRegistry, registerGlobalType } from './core/type-registry';
 
 // Version information
-export const VERSION = '0.0.1';
+export const VERSION = '0.0.2';
 
 /**
  * Create a new Kangaroo expression evaluator with default settings

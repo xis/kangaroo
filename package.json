@@ -1,6 +1,6 @@
 {
   "name": "kangaroo-expression",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Secure expression evaluator with AST-based execution - A fast, safe, and powerful JavaScript-like expression language",
   "keywords": [
     "expression",
