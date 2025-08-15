@@ -41,6 +41,13 @@ export type {
   FunctionCallContext,
   AdvancedSafeFunction,
   
+  // Type Registry types
+  TypeRegistry,
+  TypeConfig,
+  TypeSchema,
+  SerializationStrategy,
+  RegisteredType,
+  
   // Additional types
   ExpressionEvaluator,
   TemplateResult,
@@ -65,6 +72,9 @@ export { DefaultFunctionRegistry } from './functions/registry';
 
 // Callback support
 export { ASTArrayOperations, ASTCallbackEvaluator } from './callbacks/operations';
+
+// Type registry
+export { DefaultTypeRegistry, getGlobalTypeRegistry, setGlobalTypeRegistry, registerGlobalType } from './core/type-registry';
 
 // Version information
 export const VERSION = '0.0.1';

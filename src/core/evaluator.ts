@@ -24,6 +24,8 @@ import { SecurityValidator } from './validator';
 import { ASTExecutor, type ExecutionOptions } from './executor';
 import { DefaultFunctionRegistry } from '@/functions/registry';
 import { ASTArrayOperations } from '@/callbacks/operations';
+import { getGlobalTypeRegistry } from './type-registry';
+import type { TypeRegistry } from '@/types/type-registry';
 
 /**
  * Main Kangaroo expression evaluator class
@@ -37,6 +39,7 @@ export class Kangaroo implements ExpressionEvaluator {
   private executor: ASTExecutor;
   private functionRegistry: DefaultFunctionRegistry;
   private arrayOperations: ASTArrayOperations | null = null;
+  private typeRegistry: TypeRegistry;
   private options: Required<EvaluatorOptions>;
 
   // Performance tracking
@@ -73,6 +76,7 @@ export class Kangaroo implements ExpressionEvaluator {
     this.functionRegistry = new DefaultFunctionRegistry();
     this.parser = new ASTParser();
     this.validator = new SecurityValidator(this.functionRegistry);
+    this.typeRegistry = getGlobalTypeRegistry();
     
     const executionOptions: ExecutionOptions = {
       timeout: this.options.timeout,
@@ -303,6 +307,35 @@ export class Kangaroo implements ExpressionEvaluator {
   }
 
   /**
+   * Register a type with the global type registry
+   * 
+   * @param name Type name (e.g., 'FileItem')
+   * @param config Type configuration with schema and serialization strategy
+   */
+  public registerType(name: string, config: import('@/types/type-registry').TypeConfig): void {
+    this.typeRegistry.register(name, config);
+  }
+
+  /**
+   * Check if a type is registered
+   * 
+   * @param name Type name to check
+   * @returns True if the type is registered
+   */
+  public hasType(name: string): boolean {
+    return this.typeRegistry.hasType(name);
+  }
+
+  /**
+   * Get all registered types
+   * 
+   * @returns Array of registered types
+   */
+  public getRegisteredTypes(): import('@/types/type-registry').RegisteredType[] {
+    return this.typeRegistry.getRegisteredTypes();
+  }
+
+  /**
    * Reset all performance statistics
    */
   public resetStats(): void {
@@ -358,7 +391,7 @@ export class Kangaroo implements ExpressionEvaluator {
           throw new Error(evalResult.error);
         }
         
-        return evalResult.value != null ? String(evalResult.value) : '';
+        return evalResult.value != null ? this.serializeValue(evalResult.value) : '';
       });
 
       const templateResult: TemplateResult = {
@@ -508,5 +541,30 @@ export class Kangaroo implements ExpressionEvaluator {
     
     this.templateCache.set(key, value);
     this.templateCacheSize++;
+  }
+
+  /**
+   * Serialize a value using type registry or default string conversion
+   */
+  private serializeValue(value: any): string {
+    if (value == null) return '';
+    
+    // Try to detect registered type
+    const typeName = this.typeRegistry.detectType(value);
+    if (typeName) {
+      const serialized = this.typeRegistry.serialize(value, typeName);
+      
+      // If this is JSON serialization, we need to escape it for template embedding
+      const registeredType = this.typeRegistry.getRegisteredTypes().find(t => t.name === typeName);
+      if (registeredType?.config.serialization === 'json') {
+        // Escape double quotes and backslashes for JSON string embedding
+        return serialized.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+      }
+      
+      return serialized;
+    }
+    
+    // Default fallback to string conversion
+    return String(value);
   }
 }

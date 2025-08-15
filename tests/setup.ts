@@ -120,6 +120,37 @@ export const createTestContext = (overrides: any = {}) => ({
   ...overrides
 });
 
+// Type registry test utilities
+export const createTestFileItem = (overrides: any = {}) => ({
+  file_id: 'test_file_123',
+  workspace_id: 'test_workspace_456',
+  key: 'test/file.txt',
+  name: 'file.txt',
+  size_in_bytes: 1024,
+  content_type: 'text/plain',
+  url: 'https://example.com/test/file.txt',
+  ...overrides
+});
+
+export const createTestUserProfile = (overrides: any = {}) => ({
+  user_id: 'test_user_123',
+  username: 'testuser',
+  email: 'test@example.com',
+  settings: { theme: 'dark', notifications: true },
+  ...overrides
+});
+
+export const expectTypeDetection = (registry: any, value: any, expectedType: string | null) => {
+  const detected = registry.detectType(value);
+  expect(detected).toBe(expectedType);
+};
+
+export const expectJsonSerialization = (registry: any, value: any, typeName: string) => {
+  const serialized = registry.serialize(value, typeName);
+  const parsed = JSON.parse(serialized);
+  expect(parsed).toEqual(value);
+};
+
 export const expectValidEvaluation = (result: any, expectedValue: any) => {
   expect(result.success).toBe(true);
   expect(result.value).toEqual(expectedValue);

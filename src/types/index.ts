@@ -33,6 +33,16 @@ export type {
   AdvancedSafeFunction
 } from './functions';
 
+// Type registry types
+export type {
+  TypeRegistry,
+  TypeConfig,
+  TypeSchema,
+  TypePropertySchema,
+  SerializationStrategy,
+  RegisteredType
+} from './type-registry';
+
 /**
  * Main expression evaluator interface
  */
