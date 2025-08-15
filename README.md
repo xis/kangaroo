@@ -24,7 +24,7 @@ npm install kangaroo-expression
 ## Quick Start
 
 ```typescript
-import { createEvaluator } from 'kangaroo';
+import { createEvaluator, registerGlobalType } from 'kangaroo-expression';
 
 const evaluator = createEvaluator();
 
@@ -43,12 +43,30 @@ const filtered = evaluator.evaluate('items.filter(x => x.active)', {
 const template = evaluator.evaluate('Hello {{item.name.toUpperCase()}}!', {
   item: { name: 'world' }
 });
+
+// Type registry for intelligent object serialization
+registerGlobalType('Product', {
+  schema: {
+    type: 'object',
+    properties: {
+      id: { type: 'string' },
+      name: { type: 'string' },
+      price: { type: 'number' }
+    },
+    required: ['id', 'name']
+  },
+  serialization: 'object' // Returns object directly
+});
+
+const product = { id: 'p123', name: 'Laptop', price: 999.99 };
+const serialized = evaluator.getSerializedValue(product);
+console.log(serialized); // Returns the actual object, not a string
 ```
 
 ### Convenience Functions
 
 ```typescript
-import { evaluate, validate, isTemplate } from 'kangaroo';
+import { evaluate, validate, isTemplate, registerGlobalType } from 'kangaroo-expression';
 
 // Quick evaluation
 const result = evaluate('expression', context, options);
@@ -58,6 +76,22 @@ const validation = validate('expression');
 
 // Template detection  
 console.log(isTemplate('Hello {{name}}!')); // true
+
+// Type registry with different serialization strategies
+registerGlobalType('Product', {
+  schema: { /* schema definition */ },
+  serialization: 'object'  // Returns object directly
+});
+
+registerGlobalType('UserProfile', {
+  schema: { /* schema definition */ },
+  serialization: 'json'    // Returns JSON string
+});
+
+registerGlobalType('ApiResponse', {
+  schema: { /* schema definition */ },
+  serialization: 'string'  // Returns string representation
+});
 ```
 
 ## Function Categories
@@ -75,6 +109,61 @@ console.log(isTemplate('Hello {{name}}!')); // true
 **JSON Functions**: `JSON.parse`, `JSON.stringify`
 
 **Utility Functions**: `isEmpty`, `hasField`, `$if`, `$and`, `$or`, `$not`
+
+## Type Registry System
+
+Kangaroo includes a type registry that enables object serialization based on JSON Schema validation.
+
+### Serialization Strategies
+
+- **`'object'`**: Returns the object directly without conversion
+- **`'json'`**: Converts to JSON string (escaped for template embedding)  
+- **`'string'`**: Converts to string representation
+
+### Example Usage
+
+```typescript
+import { createEvaluator, registerGlobalType } from 'kangaroo-expression';
+
+// Register a type for direct object access
+registerGlobalType('Product', {
+  schema: {
+    type: 'object',
+    properties: {
+      id: { type: 'string' },
+      name: { type: 'string' },
+      price: { type: 'number' },
+      category: { type: 'string' }
+    },
+    required: ['id', 'name', 'price']
+  },
+  serialization: 'object'
+});
+
+const evaluator = createEvaluator();
+const product = {
+  id: 'prod_123',
+  name: 'Wireless Headphones',
+  price: 199.99,
+  category: 'Electronics'
+};
+
+// Get direct object access
+const directObject = evaluator.getSerializedValue(product);
+console.log(directObject === product); // true - same object reference
+
+// Templates automatically convert to JSON for embedding
+const template = evaluator.evaluate('Product: {{item}}', { item: product });
+// Result: 'Product: {"id":"prod_123","name":"Wireless Headphones",...}'
+```
+
+### Type Detection
+
+The type registry uses JSON Schema validation with performance optimizations:
+
+- **First-match-wins**: Types registered first take precedence
+- **Required properties check**: O(n) validation before full schema check
+- **Property type validation**: Validates each property against expected types
 
 ## API Reference
 

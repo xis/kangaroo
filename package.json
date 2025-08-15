@@ -1,6 +1,6 @@
 {
   "name": "kangaroo-expression",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Secure expression evaluator with AST-based execution - A fast, safe, and powerful JavaScript-like expression language",
   "keywords": [
     "expression",
@@ -58,7 +58,7 @@
     "docs:serve": "typedoc --watch",
     "dev": "npm run build:dev",
     "clean": "rimraf dist coverage docs/api",
-    "prepublishOnly": "npm run clean && npm run build && npm run test:ci",
+    "prepublishOnly": "npm run clean && npm run build && npm test",
     "release": "np",
     "size": "npm run build && bundlesize",
     "benchmark": "npm run build && node scripts/benchmark.js"

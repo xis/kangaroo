@@ -317,6 +317,17 @@ export class Kangaroo implements ExpressionEvaluator {
   }
 
   /**
+   * Get the serialized value of an object using type registry
+   * This allows access to direct object values when serialization is 'object'
+   * 
+   * @param value Value to serialize
+   * @returns Serialized value (object for 'object' strategy, string for others)
+   */
+  public getSerializedValue(value: any): any {
+    return this.serializeValue(value, false); // Don't escape for direct access
+  }
+
+  /**
    * Check if a type is registered
    * 
    * @param name Type name to check
@@ -391,7 +402,9 @@ export class Kangaroo implements ExpressionEvaluator {
           throw new Error(evalResult.error);
         }
         
-        return evalResult.value != null ? this.serializeValue(evalResult.value) : '';
+        const serialized = evalResult.value != null ? this.serializeValue(evalResult.value) : '';
+        // For template replacement, convert objects to JSON strings
+        return typeof serialized === 'object' ? JSON.stringify(serialized) : String(serialized);
       });
 
       const templateResult: TemplateResult = {
@@ -546,18 +559,20 @@ export class Kangaroo implements ExpressionEvaluator {
   /**
    * Serialize a value using type registry or default string conversion
    */
-  private serializeValue(value: any): string {
+  private serializeValue(value: any, escapeForTemplate: boolean = true): any {
     if (value == null) return '';
     
     // Try to detect registered type
     const typeName = this.typeRegistry.detectType(value);
     if (typeName) {
       const serialized = this.typeRegistry.serialize(value, typeName);
-      
-      // If this is JSON serialization, we need to escape it for template embedding
       const registeredType = this.typeRegistry.getRegisteredTypes().find(t => t.name === typeName);
-      if (registeredType?.config.serialization === 'json') {
-        // Escape double quotes and backslashes for JSON string embedding
+      
+      if (registeredType?.config.serialization === 'object') {
+        // Return the object directly for object serialization
+        return serialized;
+      } else if (registeredType?.config.serialization === 'json' && escapeForTemplate) {
+        // Escape double quotes and backslashes for JSON string embedding only when needed
         return serialized.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
       }
       

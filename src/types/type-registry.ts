@@ -8,7 +8,7 @@
 /**
  * Supported serialization strategies
  */
-export type SerializationStrategy = 'json' | 'string';
+export type SerializationStrategy = 'json' | 'string' | 'object';
 
 /**
  * Lightweight JSON Schema definition
@@ -71,9 +71,9 @@ export interface TypeRegistry {
    * 
    * @param value Value to serialize
    * @param typeName Name of the registered type
-   * @returns Serialized string
+   * @returns Serialized value (string for 'json'/'string', object for 'object')
    */
-  serialize(value: any, typeName: string): string;
+  serialize(value: any, typeName: string): any;
 
   /**
    * Get all registered types

@@ -62,7 +62,7 @@ export class DefaultTypeRegistry implements TypeRegistry {
   /**
    * Serialize value using registered serialization strategy
    */
-  public serialize(value: any, typeName: string): string {
+  public serialize(value: any, typeName: string): any {
     const registeredType = this.types.find(type => type.name === typeName);
     if (!registeredType) {
       throw new Error(`Unknown type: ${typeName}`);
@@ -76,6 +76,8 @@ export class DefaultTypeRegistry implements TypeRegistry {
           return JSON.stringify(value);
         case 'string':
           return String(value);
+        case 'object':
+          return value; // Return the object directly
         default:
           return String(value);
       }
